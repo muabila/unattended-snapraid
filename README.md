@@ -5,8 +5,15 @@ LICENCE: CC BY-NC-SA 4.0 (see licence-file included)
 
 # Description:
 
-too tiny for description
+snapraid script for nightly schedules
+
+updating parity data (if needed) and verifying results afterwards.
+
+if neither is needed scan for bad blocks or verify x% of the parity (based on last verification)
+
 
 # Usage:
 
-in progress (see example provided as comments or example-file)
+just pass snapraid-config file for the pool you want to handle:
+
+unattended-snapraid.sh /foo/bar.conf
