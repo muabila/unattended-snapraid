@@ -20,4 +20,4 @@ optional: percent of archive to reverify if nothing else to do (default 3)
 
 #### Changelog:
 
-[generated, do dont write below]
+* 2019-07-30  ready for release
