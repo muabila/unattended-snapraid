@@ -90,7 +90,7 @@ x=$(cat "$log_file" | grep "snapraid -e fix") && if [[ ! $? == 0 ]]; then
 fi
 
 if [[ $auto_remove_logs ]]; then
-    rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' )
+    rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' ) >/dev/null
 fi
 
 sync
