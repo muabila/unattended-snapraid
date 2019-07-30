@@ -6,7 +6,7 @@
 #
 
 # leave empty for logging to same folder as snapraid.conf file
-log_path=""
+log_path="/srv/bin/log"
 
 # default-pertence to verify
 defaultcheck=1
@@ -84,7 +84,7 @@ x=$(cat "$log_file" | grep "snapraid -e fix") && if [[ ! $? == 0 ]]; then
     $snapraid -c "$config" smart >> "$log_file"  2>/dev/null
 fi
 
-rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
+#~ rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
 
 sync
 
