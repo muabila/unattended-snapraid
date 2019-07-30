@@ -1,19 +1,23 @@
-#  unattended-snapraid.sh 
+#####  unattended-snapraid.sh
+
 © COPYRIGHT 2019 by T.Magerl <dev@muab.org>
 
 LICENCE: CC BY-NC-SA 4.0 (see licence-file included)
 
-# Description:
+### Description:
 
-snapraid script for nightly schedules
+* snapraid script for nightly schedules
+* updating parity data (if needed) and verifying results afterwards.
+* if neither is needed scan for bad blocks or verify x% of the parity (based on last verification)
 
-updating parity data (if needed) and verifying results afterwards.
+#### Usage:
 
-if neither is needed scan for bad blocks or verify x% of the parity (based on last verification)
+`unattended-snapraid.sh [configfile] [scheduled-check-amount]`
 
+just pass snapraid-config file for the pool you want to handle.
 
-# Usage:
+optional: percent of archive to reverify if nothing else to do (default 3)
 
-just pass snapraid-config file for the pool you want to handle:
+#### Changelog:
 
-unattended-snapraid.sh /foo/bar.conf
+* 2019-07-30  ready for release
