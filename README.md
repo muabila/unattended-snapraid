@@ -20,4 +20,5 @@ optional: percent of archive to reverify if nothing else to do (default 3)
 
 #### Changelog:
 
+* 2019-07-30 NEW FEATURE: only keep 7 most recent log files
 * 2019-07-30  ready for release

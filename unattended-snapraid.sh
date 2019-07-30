@@ -5,11 +5,16 @@
 #  LICENCE: CC BY-NC-SA 4.0 (see licence-file included)
 #
 
-# leave empty for logging to same folder as snapraid.conf file
-log_path="/srv/bin/log"
+self_config="$(dirname $0)/unattended-snapraid.conf"
 
-# default-pertence to verify
-defaultcheck=1
+if [[ ! -f "$self_config" ]]; then
+    log_path=""
+    verify_percentage=3
+    auto_remove_logs=true
+    echo -e "'$self_config' not found\nedit and rename 'unattended-snapraid.conf-SAMPLE'.\nusing default settings.\n\n" > "$log_file"
+else
+    . "$(dirname $0)"/unattended-snapraid.conf
+fi
 
 if pidof -o %PPID -x "$0">/dev/null; then exit 0; fi
 snapraid=$(which snapraid)
@@ -27,7 +32,7 @@ fi
 config="$1"
 
 if [[ -z $2 ]]; then
-    scheduledcheck=$defaultcheck
+    scheduledcheck=$verify_percentage
 fi
 
 DATUM=`date +%y%m%d`
@@ -37,11 +42,6 @@ if [[ "$log_path" == "" ]] || [[ ! -d "$log_path" ]]; then
 fi
 
 log_file="$log_path/$(basename $config)_$DATUM.log"
-
-echo $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
-echo $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
-
-exit 0
 
 echo "archive sync for $config"
 r=$($snapraid -c "$config" sync)
@@ -89,7 +89,9 @@ x=$(cat "$log_file" | grep "snapraid -e fix") && if [[ ! $? == 0 ]]; then
     $snapraid -c "$config" smart >> "$log_file"  2>/dev/null
 fi
 
-rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' )
+if [[ $auto_remove_logs ]]; then
+    rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' )
+fi
 
 sync
 
