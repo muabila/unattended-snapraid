@@ -38,6 +38,11 @@ fi
 
 log_file="$log_path/$(basename $config)_$DATUM.log"
 
+echo $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
+echo $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
+
+exit 0
+
 echo "archive sync for $config"
 r=$($snapraid -c "$config" sync)
 
@@ -84,7 +89,7 @@ x=$(cat "$log_file" | grep "snapraid -e fix") && if [[ ! $? == 0 ]]; then
     $snapraid -c "$config" smart >> "$log_file"  2>/dev/null
 fi
 
-#~ rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>5' )
+rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' )
 
 sync
 
