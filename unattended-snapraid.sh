@@ -26,7 +26,7 @@ fi
 
 if [[ -z $1 ]] || [[ ! -f "$1" ]]; then
     echo -e "unattended-snapraid script\n\nusage:\n\n   unattended-snapraid.sh \"/foo/bar/snapraid.conf\" [opt: (integer) percent to verify]\n"
-    exit 2
+    exit 1
 fi
 
 config="$1"
@@ -51,10 +51,15 @@ if [[ $notice ]]; then
     echo -e "$notice" > "$log_file"
 fi
 
-echo "archive syncing changes to $config"
-r=$($snapraid -c "$config" sync)
+action() {
+    if [[ $r =~ "Nothing to do" ]]; then
+        return 1
+    else
+        return 0
+    fi
+}
 
-if [[ ! $r =~ "Nothing to do" ]]; then
+if action; then
 
     echo "archive synced changes to $config"
     r=$($snapraid -c "$config" -p new scrub)
@@ -65,7 +70,7 @@ else
     echo "nothing new to sync, scrubbing bad blocks of $config"
     r=$($snapraid -c "$config" -p bad scrub)
 
-    if [[ $r =~ "Nothing to do" ]]; then
+    if ! action; then
 
         echo "no bad blocks found, scheduled scrubbing of $config"
         r=$($snapraid -c "$config" -p $scheduledcheck scrub) # -o 90
