@@ -1,0 +1,20 @@
+# leave empty for logging to same folder as
+# processed snapraid.conf file
+#
+# log_path="" [default]
+# log_path="/foo/bar"
+#
+log_path=""
+
+# default-percentage to verify
+#
+# verify_percentage=3 [default]
+#
+verify_percentage=3
+
+# only keep last 7 log files per snapraid-config
+#
+# auto_remove_logs=true [default]
+# auto_remove_logs=false
+#
+auto_remove_logs=true

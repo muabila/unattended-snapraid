@@ -1,1 +1,13 @@
-2019-07-30  ready for release
+Last updated: 2019-07-31
+
+
+2019-07-31:
+
+  * minor bugfix
+
+2019-07-30:
+
+  *  ready for release
+  * NEW FEATURE: only keep 7 most recent log files
+  * NEW FEATURE: default settings via config file
+  * bugfix: suppress error message while removing non-existent logfiles
