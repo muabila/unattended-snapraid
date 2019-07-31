@@ -11,7 +11,7 @@ if [[ ! -f "$self_config" ]]; then
     log_path=""
     verify_percentage=3
     auto_remove_logs=true
-    echo -e "'$self_config' not found\nedit and rename 'unattended-snapraid.conf-SAMPLE'.\nusing default settings.\n\n" > "$log_file"
+    notice="'$self_config' not found\nedit and rename 'unattended-snapraid.conf-SAMPLE'.\nusing default settings.\n\n"
 else
     . "$(dirname $0)"/unattended-snapraid.conf
 fi
@@ -41,15 +41,24 @@ if [[ "$log_path" == "" ]] || [[ ! -d "$log_path" ]]; then
     log_path="$(dirname $config)"
 fi
 
+if [[ $auto_remove_logs ]] && [[ $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' ) != "" ]]; then
+    rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' )
+fi
+
 log_file="$log_path/$(basename $config)_$DATUM.log"
 
-echo "archive sync for $config"
+if [[ $notice ]]; then
+    echo -e "$notice" > "$log_file"
+fi
+
+echo "archive syncing changes to $config"
 r=$($snapraid -c "$config" sync)
 
 if [[ ! $r =~ "Nothing to do" ]]; then
 
+    echo "archive synced changes to $config"
     r=$($snapraid -c "$config" -p new scrub)
-    echo "archive sync done for $config"
+    echo "scrubed recent sync $config"
 
 else
 
@@ -64,14 +73,13 @@ else
 
     else
 
-        echo "scrubbing bad blocks done in $config"
+        echo "scrubbing bad blocks done for $config"
 
         fi
     fi
 
-sleep 5
-
 r=$($snapraid -c "$config" touch)
+sync
 
 $snapraid -c "$config" status  2>/dev/null \
     | grep -v "|" \
@@ -80,7 +88,8 @@ $snapraid -c "$config" status  2>/dev/null \
     | grep -v "Self test" \
     | grep -v "of memory" >> "$log_file"
 
-x=$(cat "$log_file" | grep "snapraid -e fix") && if [[ ! $? == 0 ]]; then
+x=$(cat "$log_file" | grep "snapraid -e fix")
+if [[ ! $? == 0 ]]; then
     status="$(cat $log_file) \n \n "
     status="$status \n \n Fixing result: \n $(cat $log_file | grep errors)"
 
@@ -89,12 +98,6 @@ x=$(cat "$log_file" | grep "snapraid -e fix") && if [[ ! $? == 0 ]]; then
     $snapraid -c "$config" smart >> "$log_file"  2>/dev/null
 fi
 
-if [[ $auto_remove_logs ]]; then
-    rm $( ls -t "$log_path/$(basename $config)"_??????.log | awk 'NR>7' ) >/dev/null
-fi
-
-sync
-
-echo "done."
+echo "unattended-snapraid results saved to '$log_file'"
 
 exit 0
