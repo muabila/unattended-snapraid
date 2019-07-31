@@ -20,7 +20,10 @@ optional: percent of archive to reverify if nothing else to do (default 3)
 
 #### Changelog:
 
-* 2019-07-30 bugfix: suppress error message while removing non-existent logfiles
-* 2019-07-30 NEW FEATURE: default settings via config file
-* 2019-07-30 NEW FEATURE: only keep 7 most recent log files
-* 2019-07-30  ready for release
+* 2019-07-31
+  * minor bugfix
+* 2019-07-30
+  *  ready for release
+  * NEW FEATURE: only keep 7 most recent log files
+  * NEW FEATURE: default settings via config file
+  * bugfix: suppress error message while removing non-existent logfiles
