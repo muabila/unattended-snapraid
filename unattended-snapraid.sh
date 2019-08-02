@@ -46,9 +46,12 @@ if [[ $auto_remove_logs ]] && [[ $( ls -t "$log_path/$(basename $config)"_??????
 fi
 
 log_file="$log_path/$(basename $config)_$DATUM.log"
+debug_file="$log_path/$(basename $config)_$DATUM.tmp"
+
+echo -e "### snapraid results for '$config', created by unattended-snapraid\n" > "$log_file"
 
 if [[ $notice ]]; then
-    echo -e "$notice" > "$log_file"
+    echo -e "$notice" >> "$log_file"
 fi
 
 action() {
@@ -59,50 +62,74 @@ action() {
     fi
 }
 
+important() {
+    if [[ $r =~ "Nothing to do" ]]; then
+        return 1
+    elif [[ $r =~ "No rehash is in progress or needed." ]] && \
+            [[ $r =~ "No error detected." ]]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+log() {
+    echo -e "\n$@" >> "$log_file"
+    echo -e "\nunattended-snapraid '$config': $@"
+}
+
+snap() {
+    r=$($snapraid -c "$config" $@)
+    exit_code=$?
+
+    if [[ ! $exit_code == 0 ]]; then
+        log "\nsnapraid (not unattended-snapraid) failed execution:\n\n$r\n\nplease test snapraid manually"
+        exit 2
+    fi
+
+    if important; then
+        log "$r"
+    fi
+}
+
+log "syncing changes"
+snap sync >>/dev/null
+
 if action; then
 
-    echo "archive synced changes to $config"
-    r=$($snapraid -c "$config" -p new scrub)
-    echo "scrubed recent sync $config"
+    log "scrubbing recent sync"
+    snap -p new scrub >>/dev/null
 
 else
 
-    echo "nothing new to sync, scrubbing bad blocks of $config"
-    r=$($snapraid -c "$config" -p bad scrub)
+    log "no changes found, scrubbing bad blocks"
+    snap -p bad scrub >>/dev/null
 
     if ! action; then
-
-        echo "no bad blocks found, scheduled scrubbing of $config"
-        r=$($snapraid -c "$config" -p $scheduledcheck scrub) # -o 90
-        echo "scheduled scrub done for $config"
-
-    else
-
-        echo "scrubbing bad blocks done for $config"
-
-        fi
+        log "no bad blocks found, scheduled scrubbing ($scheduledcheck%)"
     fi
+
+fi
 
 r=$($snapraid -c "$config" touch)
 sync
 
-$snapraid -c "$config" status  2>/dev/null \
+snap status 2>/dev/null \
     | grep -v "|" \
     | grep -v "last scrub" \
     | grep -v "Loading state" \
     | grep -v "Self test" \
-    | grep -v "of memory" >> "$log_file"
+    | grep -v "of memory"
 
-x=$(cat "$log_file" | grep "snapraid -e fix")
-if [[ ! $? == 0 ]]; then
-    status="$(cat $log_file) \n \n "
-    status="$status \n \n Fixing result: \n $(cat $log_file | grep errors)"
+if [[ $(cat "$log_file") =~ "snapraid -e fix" ]]; then
 
-    $snapraid -e -c "$config" fix  2>/dev/null> "$log_file"
+    log "trying to fix found errors"
+    snap -e fix
 
-    $snapraid -c "$config" smart >> "$log_file"  2>/dev/null
 fi
 
-echo "unattended-snapraid results saved to '$log_file'"
+snap smart 2>/dev/null
+
+echo "unattended-snapraid: results saved to '$log_file'"
 
 exit 0
